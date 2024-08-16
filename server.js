@@ -7,6 +7,7 @@ import { connectDB } from './mongoDB.js';
 import studentRouter from './routes/studentRoutes.js';
 import teacherRouter from './routes/teacherRouter.js';
 import classroomRouter from './routes/classroomRouter.js';
+import authRouter from './routes/authRouter.js';
 
 
 dotenv.config();
@@ -23,28 +24,31 @@ app.use(morgan('dev')); // Log HTTP requests
 
 connectDB().then(()=>{
   console.log('db conneted');
-}).catch((err)=>{
-  console.log(err);
-});
+  
+  // Define Routes 
+  
+  app.use('/students/',studentRouter);
+  app.use('/teachers/',teacherRouter);
+  app.use('/classrooms/',classroomRouter);
+  app.use('/auth/',authRouter);
 
-// Define Routes 
-
-app.use('/students/',studentRouter);
-app.use('/teachers/',teacherRouter);
-app.use('/classrooms/',classroomRouter);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Something went wrong!',
+  console.log(process.env.JWT_SECRET);
+  
+  // Error handling middleware
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+      error: 'Something went wrong!',
+    });
   });
-});
-
-// Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+  
+  // Start the server
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+}).catch((err)=>{
+  console.log(err);
+});
 export default app;
