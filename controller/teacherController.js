@@ -9,9 +9,22 @@ export const getTeacherInfo = async (req, res) => {
     }
   };
   
-export const getTeacherClassrooms = async (req, res) => {
+  export const getTeacherClassrooms = async (req, res) => {
     try {
-      res.json('teacher classrooms');
+      const teacherId = req.teacher.teacherId;
+  
+      const classrooms = await ClassroomModel.find({ teacher: teacherId });
+  
+      if (!classrooms.length) {
+        return res.status(404).json({ message: 'No classrooms found for this teacher' });
+      }
+  
+      res.status(200).json(
+        classrooms.map(classroom => ({
+          classroomId: classroom.classroomId,
+          classroomName: classroom.classroomName
+        }))
+      );
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
