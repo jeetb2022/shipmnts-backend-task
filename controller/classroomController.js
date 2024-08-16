@@ -162,11 +162,33 @@ export const addStudentToClassroom = async (req, res) => {
       res.status(500).json({ message: err.message });
     }
   };
-export const getSubmissionStatusStudents = async (req, res) => {
+  export const getSubmissionStatusStudents = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    const taskId = req.params.taskId;
+  
     try {
-      res.json('classroom');
+      const classroom = await ClassroomModel.findOne({ classroomId });
+      if (!classroom) {
+        return res.status(404).json({ message: 'Classroom not found' });
+      }
+  
+      const task = await TaskModel.findOne({ taskId, classroom: classroomId }).populate('submissions.student', 'studentId name');
+      if (!task) {
+        return res.status(404).json({ message: 'Task not found in this classroom' });
+      }
+  
+      const submissionStatus = classroom.students.map(studentId => {
+        const submission = task.submissions.find(sub => sub.student.toString() === studentId.toString());
+        return {
+          studentId,
+          studentName: submission.student.name,
+          status: submission ? submission.status : 'pending'
+        };
+      });
+  
+      res.status(200).json(submissionStatus);
+  
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
   };
-  
