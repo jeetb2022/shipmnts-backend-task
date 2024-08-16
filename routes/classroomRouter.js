@@ -5,7 +5,7 @@ import { isTeacherVerified } from '../middleware/verifyUser.js';
 const classroomRouter = express.Router();
 
 // Add Studnet to Classroom
-classroomRouter.get('/:classroomId/students', isTeacherVerified,addStudentToClassroom );
+classroomRouter.post('/:classroomId/students', isTeacherVerified,addStudentToClassroom );
 
 // Remove Studnet from Classroom
 classroomRouter.delete('/:classroomId/students/:studentId', isTeacherVerified,removeStudentFromClassroom );
