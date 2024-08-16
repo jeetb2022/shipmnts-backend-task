@@ -1,14 +1,14 @@
 import express from 'express';
-import { getStudentClassroom } from '../controller/studentController.js';
 import { submitClassroomTask } from '../controller/studentController.js';
 import { getTaskStatus } from '../controller/studentController.js';
 import { isStudentVerified } from '../middleware/verifyUser.js';
 import { getClassroomTasksForStudent } from '../controller/studentController.js';
+import { getStudentClassrooms } from '../controller/studentController.js';
 
 const studentRouter = express.Router();
 
 // View Classrooms
-studentRouter.get('/:studentId/classrooms',isStudentVerified , getStudentClassroom);
+studentRouter.get('/:studentId/classrooms',isStudentVerified , getStudentClassrooms);
 
 // View Tasks
 studentRouter.get('/:studentId/classrooms/:classroomId',isStudentVerified , getClassroomTasksForStudent);

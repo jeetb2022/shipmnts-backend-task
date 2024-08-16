@@ -4,4 +4,4 @@ cd shipmnts-backend-task
 
 npm install
 
-npm run dev
+nodemon .\server.js
