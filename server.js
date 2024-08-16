@@ -16,7 +16,11 @@ const app = express();
 
 // Middleware
 app.use(express.json()); // Parse incoming JSON requests
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: '*', // Allow requests from any origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow these methods
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allow these headers
+}));
 app.use(morgan('dev')); // Log HTTP requests
 
 // Connect to MongoDB
