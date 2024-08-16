@@ -1,5 +1,7 @@
 import ClassroomModel from "../models/classroomModel.js";
 import StudentModel from "../models/studentModel.js";
+import TaskModel from "../models/taskSchema.js";
+import {v4 as uuid} from 'uuid';
 
 export const addStudentToClassroom = async (req, res) => {
     try {
@@ -73,23 +75,89 @@ export const addStudentToClassroom = async (req, res) => {
       res.status(500).json({ message: err.message });
     }
   };
-export const addTasksToClassroom = async (req, res) => {
+  export const addTasksToClassroom = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    const { title, description, dueDate } = req.body;
+    const teacherId = req.teacher.teacherId; 
+
     try {
-      res.json('classroom');
+      if (!title || !description || !dueDate) {
+        return res.status(400).json({ message: 'Title, description, and dueDate are required' });
+      }
+  
+      const classroom = await ClassroomModel.findOne({ classroomId, teacher: teacherId });
+      if (!classroom) {
+        return res.status(404).json({ message: 'Classroom not found or does not belong to the teacher' });
+      }
+  const taskId = uuid();
+      const newTask = new TaskModel({
+        title,
+        taskId,
+        description,
+        dueDate,
+        classroom: classroomId 
+      });
+  
+      await newTask.save();
+  
+      classroom.tasks.push(taskId);
+      await classroom.save();
+  
+      res.status(201).json({
+        taskId: taskId,
+        title: newTask.title,
+        description: newTask.description,
+        dueDate: newTask.dueDate
+      });
+  
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
   };
-export const editClassroom = async (req, res) => {
+  export const editClassroom = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    const { classroomName } = req.body;
+    const teacherId = req.teacher.teacherId;
+  
     try {
-      res.json('classroom');
+
+        if (!classroomName) {
+        return res.status(400).json({ message: 'Classroom name is required' });
+      }
+  
+      const classroom = await ClassroomModel.findOne({ classroomId, teacher: teacherId });
+      if (!classroom) {
+        return res.status(404).json({ message: 'Classroom not found or does not belong to the teacher' });
+      }
+  
+      classroom.classroomName = classroomName;
+      await classroom.save();
+  
+      res.status(200).json({
+        classroomId: classroom.classroomId,
+        classroomName: classroom.classroomName
+      });
+  
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
   };
-export const deleteClassroom = async (req, res) => {
+  export const deleteClassroom = async (req, res) => {
+    const classroomId = req.params.classroomId;
+    const teacherId = req.teacher.teacherId;
+  
     try {
-      res.json('classroom');
+      const classroom = await ClassroomModel.findOne({ classroomId, teacher: teacherId });
+      if (!classroom) {
+        return res.status(404).json({ message: 'Classroom not found or does not belong to the teacher' });
+      }
+  
+      await TaskModel.deleteMany({ classroom: classroomId });
+  
+      await ClassroomModel.deleteOne({ classroomId });
+  
+      res.status(200).json({ message: 'Classroom deleted successfully' });
+  
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
